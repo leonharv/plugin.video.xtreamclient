@@ -1,5 +1,4 @@
 import requests
-from requests.models import Response
 
 from connection import Connection
 from url_api_builder import EndpointEnum, Url_api_builder
@@ -10,6 +9,8 @@ class Client:
         self._url = url
         self.last_error="None"
         self.matched, self._connection = Connection.from_url(url)
+        self.session = requests.Session()
+        self.session.headers['User-Agent'] = 'kodi.plugin.video.xtreamclient'
 
     def user_panel(self):
         return self._get(EndpointEnum.USER_PANEL)
@@ -56,11 +57,9 @@ class Client:
         return self._get(EndpointEnum.CATCHUP)
 
     def _get(self, ep: EndpointEnum, *args):
-        r = Response
-        r.status_code=200
         self.last_error="None"
         try:
-            r = requests.get(Url_api_builder.build(ep, self._connection, *args))
+            r = self.session.get(Url_api_builder.build(ep, self._connection, *args))
             if r.status_code==200:
                 self.last_error="None"
                 return r.json()

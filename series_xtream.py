@@ -287,7 +287,7 @@ def list_series_categories():
     xbmcplugin.setContent(_HANDLE, 'videos')
     # Get video categories
     myclient=start_connection()
-    categories = get_series_categories_list(myclient, "DE ")
+    categories = get_series_categories_list(myclient, '')
     # Iterate through categories
     for category in categories:
         # Create a list item with a text label and a thumbnail image.
@@ -425,6 +425,7 @@ def list_seasons_in_serie(category_name:str, serie_name:str, serie_id:str):
     pass
 
 def list_episodes_in_season(season_number:str, serie_name:str, serie_id:str):
+    global myconfig
     #TODO FIXME for right info
     log("### list_episodes_in_season")
     xbmcplugin.setPluginCategory(_HANDLE, serie_name+"/"+season_number)
@@ -482,13 +483,14 @@ def list_episodes_in_season(season_number:str, serie_name:str, serie_id:str):
         # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
         # Here we use the same image for all items for simplicity's sake.
         # In a real-life plugin you need to set each image accordingly.
-        list_item.setArt({'thumb': video['info']['movie_image'], 'icon': video['info']['movie_image'], 'fanart': video['info']['cover_big']})
+        list_item.setArt({'thumb': video['info']['movie_image'], 'icon': video['info']['movie_image'], 'fanart': video['info']['movie_image']})
         # Set 'IsPlayable' property to 'true'.
         # This is mandatory for playable items!
         list_item.setProperty('IsPlayable', 'true')
         # Create a URL for a plugin recursive call.
         # Example: plugin://plugin.video.example/?action=play&video=http://www.vidsplay.com/wp-content/uploads/2017/04/crab.mp4
-        url = get_url(action='play', video=direct_source)
+        source = f"{myconfig['url']}:{myconfig['port']}/series/{myconfig['username']}/{myconfig['password']}/{video['id']}.{video['container_extension']}"
+        url = get_url(action='play', video=source)
         # Add the list item to a virtual Kodi folder.
         # is_folder = False means that this item won't open any sub-list.
         is_folder = False

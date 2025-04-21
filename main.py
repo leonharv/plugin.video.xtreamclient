@@ -164,12 +164,12 @@ def get_Live_by_category(category):
         show_dialog("ERROR (3): "+error)
     mylist=[]
     if isinstance (videos, list):        
-        for o in videos :
+        for o in videos:
             #TODO: fixme Mapping
             if o['epg_channel_id']!=None:
                 item={}
                 item['name']=o['name']
-                item['video']=o['direct_source']
+                item['stream_id']=o['stream_id']
                 item['thumb']=o['stream_icon']
                 item['category']=category
                 item['category_id']=o['category_id']
@@ -184,7 +184,7 @@ def get_Live_by_category(category):
     if isinstance (videos, dict):
         item={}
         item['name']=o['name']
-        item['video']=o['direct_source']
+        item['stream_id']=o['stream_id']
         item['thumb']=o['stream_icon']
         mylist[o['name']]=item
 
@@ -203,15 +203,11 @@ def get_vod_by_category(category):
             #TODO: fixme Mapping
             item={}
             item['name']=o['name']
-            item['video']=o['direct_source']
+            item['stream_id']=o['stream_id']
+            item['container_extension']=o['container_extension']
             item['thumb']=o['stream_icon']
             item['category']=category
             item['category_id']=o['category_id']
-            item['year']=o['year']
-            item['thumb']=o['stream_icon']
-            item['plot']=o['plot']
-            item['genre']=o['genre']
-            item['title']=o['title']
             mylist.append(item)
             #mylist[o['name']]=item
             #categories[o['category_name']]={}
@@ -448,6 +444,7 @@ def list_live_streams(category):
     :param category: Category name
     :type category: str
     """
+    global myconfig
     # Set plugin category. It is displayed in some skins as the name
     # of the current section.
     xbmcplugin.setPluginCategory(_HANDLE, category)
@@ -477,7 +474,8 @@ def list_live_streams(category):
         list_item.setProperty('IsPlayable', 'true')
         # Create a URL for a plugin recursive call.
         # Example: plugin://plugin.video.example/?action=play&video=http://www.vidsplay.com/wp-content/uploads/2017/04/crab.mp4
-        url = get_url(action='play', video=video['video'])
+        source = f"{myconfig['url']}:{myconfig['port']}/live/{myconfig['username']}/{myconfig['password']}/{video['stream_id']}.ts"
+        url = get_url(action='play', video=source)
         # Add the list item to a virtual Kodi folder.
         # is_folder = False means that this item won't open any sub-list.
         is_folder = False
@@ -517,9 +515,7 @@ def list_vod_streams(category_id, category_name):
         genre=VIDEOS.get_name(id) #change for VOD
         list_item.setInfo('video', {'title': video['name'],
                                     'set': genre, #video['category'],
-                                    'year':video['year'],
-                                    'mediatype': 'video',
-                                    "plot" : video["plot"]})
+                                    'mediatype': 'video'})
         # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
         # Here we use the same image for all items for simplicity's sake.
         # In a real-life plugin you need to set each image accordingly.
@@ -529,7 +525,8 @@ def list_vod_streams(category_id, category_name):
         list_item.setProperty('IsPlayable', 'true')
         # Create a URL for a plugin recursive call.
         # Example: plugin://plugin.video.example/?action=play&video=http://www.vidsplay.com/wp-content/uploads/2017/04/crab.mp4
-        url = get_url(action='play', video=video['video'])
+        source = f"{myconfig['url']}:{myconfig['port']}/movie/{myconfig['username']}/{myconfig['password']}/{video['stream_id']}.{video['container_extension']}"
+        url = get_url(action='play', video=source)
         # Add the list item to a virtual Kodi folder.
         # is_folder = False means that this item won't open any sub-list.
         is_folder = False
